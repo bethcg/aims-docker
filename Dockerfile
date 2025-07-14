@@ -1,52 +1,99 @@
-########################################################
-#        Renku install section - do not edit           #
+# Advanced AI/ML Tools Dockerfile
 
-FROM renku/renkulab-py:3.10-0.24.0 as builder
+# Use official NVIDIA CUDA base image for GPU acceleration
+FROM nvidia/cuda:12.1-cudnn8-runtime-ubuntu22.04
 
-# RENKU_VERSION determines the version of the renku CLI
-# that will be used in this image. To find the latest version,
-# visit https://pypi.org/project/renku/#history.
-ARG RENKU_VERSION=2.9.4
+# Set working directory
+WORKDIR /workspace
 
-# Install renku from pypi or from github if a dev version
-RUN if [ -n "$RENKU_VERSION" ] ; then \
-        source .renku/venv/bin/activate ; \
-        currentversion=$(renku --version) ; \
-        if [ "$RENKU_VERSION" != "$currentversion" ] ; then \
-            pip uninstall renku -y ; \
-            gitversion=$(echo "$RENKU_VERSION" | sed -n "s/^[[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\(rc[[:digit:]]\+\)*\(\.dev[[:digit:]]\+\)*\(+g\([a-f0-9]\+\)\)*\(+dirty\)*$/\4/p") ; \
-            if [ -n "$gitversion" ] ; then \
-                pip install --no-cache-dir --force "git+https://github.com/SwissDataScienceCenter/renku-python.git@$gitversion" ;\
-            else \
-                pip install --no-cache-dir --force renku==${RENKU_VERSION} ;\
-            fi \
-        fi \
-    fi
-#             End Renku install section                #
-########################################################
+# Install core utilities
+RUN pip install --no-cache-dir \
+    pip \
+    setuptools \
+    wheel \
+    nvidia-pyindex \
+    nvidia-dali-cuda
 
-FROM renku/renkulab-py:3.10-0.24.0
+# Install numerical & data processing libraries
+RUN pip install --no-cache-dir \
+    numpy \
+    pandas \
+    scipy \
+    tqdm \
+    joblib \
+    dask \
+    modin \
+    faiss-cpu
 
-# Uncomment and adapt if code is to be included in the image
-# COPY src /code/src
+# Install visualization & monitoring tools
+RUN pip install --no-cache-dir \
+    matplotlib \
+    seaborn \
+    plotly \
+    tensorboard \
+    wandb
 
-# Uncomment and adapt if your R or python packages require extra linux (ubuntu) software
-# e.g. the following installs apt-utils and vim; each pkg on its own line, all lines
-# except for the last end with backslash '\' to continue the RUN line
-#
-# USER root
-# RUN apt-get update && \
-#    apt-get install -y --no-install-recommends \
-#    apt-utils \
-#    vim
-# USER ${NB_USER}
+# Install machine learning frameworks
+RUN pip install --no-cache-dir \
+    scikit-learn \
+    xgboost \
+    lightgbm \
+    catboost \
+    rapidsai
 
-# install the python dependencies
-COPY requirements.txt environment.yml /tmp/
-RUN mamba env update -q -f /tmp/environment.yml && \
-    /opt/conda/bin/pip install -r /tmp/requirements.txt --no-cache-dir && \
-    mamba clean -y --all && \
-    mamba env export -n "root" && \
-    rm -rf ${HOME}/.renku/venv
+# Install deep learning frameworks
+RUN pip install --no-cache-dir \
+    tensorflow \
+    torch \
+    torchvision \
+    torchaudio \
+    keras \
+    jax \
+    flax \
+    timm
 
-COPY --from=builder ${HOME}/.renku/venv ${HOME}/.renku/venv
+# Install NLP libraries
+RUN BLIS_ARCH="generic" pip install --no-cache-dir \
+    nltk \
+    spacy \
+    transformers \
+    sentence-transformers \
+    textblob \
+    fugashi
+
+# Install reinforcement learning tools
+RUN pip install --no-cache-dir \
+    gym \
+    stable-baselines3 \
+    ray[rllib]
+
+# Install model optimization & deployment tools
+RUN pip install --no-cache-dir \
+    onnx \
+    onnxruntime-gpu \
+    mlflow \
+    torchscript \
+    tritonserver \
+    fastapi
+
+# Install data handling & feature engineering tools
+RUN pip install --no-cache-dir \
+    pillow \
+    opencv-python \
+    pyarrow \
+    scikit-image \
+    faiss-gpu
+
+# Install distributed computing & scalability tools
+RUN pip install --no-cache-dir \
+    ray \
+    horovod \
+    dask \
+    spark-nlp \
+    pytorch-lightning
+
+# Expose Jupyter Notebook port
+EXPOSE 8888
+
+# Default command to run Jupyter Notebook
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
