@@ -1,7 +1,7 @@
 # Advanced AI/ML Tools Dockerfile
 
 # Use official NVIDIA CUDA base image for GPU acceleration
-FROM nvidia/cuda:12.1-cudnn8-runtime-ubuntu22.04
+FROM docker pull nvidia/cuda:12.9.1-cudnn-devel-ubi8
 
 # Set working directory
 WORKDIR /workspace
