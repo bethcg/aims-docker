@@ -7,7 +7,7 @@ FROM nvidia/cuda:12.9.1-cudnn-devel-ubuntu20.04
 WORKDIR /workspace
 
 # Install core utilities
-RUN pip install --no-cache-dir
+RUN pip install pip
 
 # Expose Jupyter Notebook port
 EXPOSE 8888
